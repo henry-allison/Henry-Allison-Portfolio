@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Henry Allison — Film Producer & Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0c0b;
+      --text: #f0ede8;
+      --muted: rgba(240, 237, 232, 0.78);
+      --hint: rgba(240, 237, 232, 0.45);
+      --border: rgba(255, 255, 255, 0.08);
+      --accent: #c8a97e;
+      --netflix: #e50914;
+      --sans: 'DM Sans', sans-serif;
+      --serif: 'DM Serif Display', Georgia, serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* FILM GRAIN */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* HOVER PREVIEW */
+    #preview-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    #preview-overlay.active { opacity: 1; }
+
+    #preview-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transform: scale(1.04);
+      transition: transform 0.6s ease;
+    }
+
+    #preview-overlay.active #preview-img {
+      transform: scale(1);
+    }
+
+    #preview-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to right,
+        rgba(12, 12, 11, 0.88) 0%,
+        rgba(12, 12, 11, 0.55) 50%,
+        rgba(12, 12, 11, 0.45) 100%
+      );
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      border-bottom: 0.5px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: rgba(240, 237, 232, 0.9);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      color: var(--hint);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      padding: 8rem 3rem 7rem;
+      border-bottom: 0.5px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: end;
+      position: relative;
+      z-index: 60;
+    }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero-name {
+      font-size: 62px;
+      font-weight: 500;
+      line-height: 1.0;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      font-family: var(--sans);
+    }
+
+    .hero-right { padding-bottom: 6px; }
+
+    .hero-bio {
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--muted);
+      max-width: 420px;
+      margin-bottom: 2rem;
+    }
+
+    .hero-bio em {
+      color: var(--text);
+      font-style: normal;
+    }
+
+    .hero-netflix {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 18px;
+      border: 0.5px solid rgba(240, 237, 232, 0.2);
+      border-radius: 2px;
+      font-size: 12px;
+      color: rgba(240, 237, 232, 0.7);
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .hero-netflix:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .netflix-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--netflix);
+      flex-shrink: 0;
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 5rem 3rem;
+      border-bottom: 0.5px solid var(--border);
+      position: relative;
+      z-index: 60;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 3rem;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .section-count {
+      font-size: 11px;
+      color: rgba(240, 237, 232, 0.3);
+    }
+
+    /* PROJECT ROWS */
+    .project-list { display: flex; flex-direction: column; }
+
+    .project-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+      padding: 1.25rem 0;
+      border-top: 0.5px solid var(--border);
+      text-decoration: none;
+      transition: padding-left 0.2s ease;
+    }
+
+    .project-row:last-child { border-bottom: 0.5px solid var(--border); }
+
+    .project-row:hover { padding-left: 6px; }
+    .project-row:hover .project-title { color: var(--accent); }
+    .project-row:hover .project-year { color: var(--accent); opacity: 0.6; }
+
+    .project-row-static {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+      padding: 1.25rem 0;
+      border-top: 0.5px solid var(--border);
+      position: relative;
+      cursor: default;
+    }
+
+    .project-row-static:last-child { border-bottom: 0.5px solid var(--border); }
+
+    .project-row-static .project-title {
+      color: rgba(240, 237, 232, 0.35);
+    }
+
+    .coming-soon-tooltip {
+      display: none;
+      position: absolute;
+      left: 32px;
+      bottom: calc(100% - 8px);
+      background: rgba(240, 237, 232, 0.07);
+      border: 0.5px solid rgba(240, 237, 232, 0.15);
+      border-radius: 2px;
+      padding: 4px 10px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .project-row-static:hover .coming-soon-tooltip { display: block; }
+
+    .project-left {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+    }
+
+    .project-index {
+      font-size: 11px;
+      color: rgba(240, 237, 232, 0.22);
+      width: 20px;
+      flex-shrink: 0;
+    }
+
+    .project-title {
+      font-size: 17px;
+      font-weight: 500;
+      color: rgba(240, 237, 232, 0.88);
+      transition: color 0.2s;
+    }
+
+    .project-sub {
+      font-size: 13px;
+      color: rgba(240, 237, 232, 0.5);
+      margin-top: 3px;
+    }
+
+    .project-year {
+      font-size: 12px;
+      color: rgba(240, 237, 232, 0.3);
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .featured-row .project-title { color: var(--text); }
+
+    .featured-badge {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--netflix);
+      padding: 2px 8px;
+      border: 0.5px solid rgba(229, 9, 20, 0.4);
+      border-radius: 2px;
+      margin-left: 12px;
+      vertical-align: middle;
+    }
+
+    .dual-badge {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: rgba(240, 237, 232, 0.4);
+      padding: 2px 8px;
+      border: 0.5px solid rgba(240, 237, 232, 0.15);
+      border-radius: 2px;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    /* WRITING */
+    .writing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .writing-card {
+      padding: 1.75rem;
+      border: 0.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      transition: border-color 0.2s;
+      text-decoration: none;
+      display: block;
+    }
+
+    .writing-card:hover {
+      border-color: var(--accent);
+    }
+
+    .writing-title {
+      font-size: 17px;
+      font-weight: 500;
+      color: rgba(240, 237, 232, 0.92);
+      line-height: 1.4;
+      margin-bottom: 0.6rem;
+      transition: color 0.2s;
+    }
+
+    .writing-card:hover .writing-title { color: var(--accent); }
+
+    .writing-desc {
+      font-size: 14px;
+      color: rgba(240, 237, 232, 0.55);
+      line-height: 1.6;
+    }
+
+    .writing-link {
+      margin-top: 1.25rem;
+      font-size: 12px;
+      color: rgba(240, 237, 232, 0.35);
+      letter-spacing: 0.04em;
+    }
+
+    .substack-cta {
+      margin-top: 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(240, 237, 232, 0.35);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .substack-cta:hover { color: var(--accent); }
+
+    /* PULLQUOTE */
+    .belief {
+      padding: 5rem 3rem 6rem;
+      border-bottom: 0.5px solid var(--border);
+      position: relative;
+      z-index: 60;
+    }
+
+    .belief-text {
+      font-size: 30px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: rgba(240, 237, 232, 0.65);
+      max-width: 700px;
+      font-family: var(--serif);
+    }
+
+    .belief-text em {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    /* ABOUT */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+
+    .photo-frame {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: #1a1917;
+      border: 0.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    .about-body {
+      font-size: 17px;
+      line-height: 1.9;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+    }
+
+    .about-body p { margin-bottom: 1.25rem; }
+    .about-body p:last-child { margin-bottom: 0; }
+
+    .about-body em {
+      color: var(--text);
+      font-style: normal;
+    }
+
+    .about-links {
+      display: flex;
+      gap: 2rem;
+      padding-top: 2rem;
+      border-top: 0.5px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .about-link-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .about-link-value {
+      font-size: 15px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    a.about-link-value:hover { color: var(--accent); }
+
+    /* FOOTER */
+    footer {
+      padding: 1.75rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      z-index: 60;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: rgba(240, 237, 232, 0.25);
+    }
+
+    .footer-chat {
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: opacity 0.2s;
+    }
+
+    .footer-chat:hover { opacity: 0.7; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 1.25rem 1.5rem; }
+      .nav-links { gap: 1.25rem; }
+      .nav-links a { font-size: 12px; }
+      .hero { grid-template-columns: 1fr; padding: 4rem 1.5rem 3rem; gap: 2rem; }
+      .hero-name { font-size: 44px; }
+      section { padding: 3rem 1.5rem; }
+      .writing-grid { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .photo-frame { aspect-ratio: 4/3; max-width: 280px; }
+      .belief { padding: 3rem 1.5rem 4rem; }
+      .belief-text { font-size: 24px; }
+      footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
+      .about-links { flex-direction: column; gap: 1.5rem; }
+      #preview-overlay { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HOVER PREVIEW OVERLAY -->
+  <div id="preview-overlay">
+    <img id="preview-img" src="" alt="">
+  </div>
+
+  <nav>
+    <a href="#" class="nav-logo">Henry Allison</a>
+    <ul class="nav-links">
+      <li><a href="#producing">Producing</a></li>
+      <li><a href="#editing">Editing</a></li>
+      <li><a href="#writing">Writing</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">Film producer &amp; editor</p>
+      <h1 class="hero-name">Henry<br>Allison</h1>
+    </div>
+    <div class="hero-right">
+      <p class="hero-bio">
+        Big story guy. Salt Lake City based film producer and editor. Partner at <em>Brown Barn Studios</em>. Let's make something together.
+      </p>
+      <a href="https://www.netflix.com/title/82161512" target="_blank" rel="noopener" class="hero-netflix" data-preview="Noah-Kahan-Out-of-Body.jpg">
+        <span class="netflix-dot"></span>
+        Noah Kahan: Out of Body — now on Netflix
+      </a>
+    </div>
+  </div>
+
+  <section id="producing">
+    <div class="section-header">
+      <span class="section-label">Producing</span>
+      <span class="section-count">Selected work</span>
+    </div>
+    <div class="project-list">
+      <a href="https://www.netflix.com/title/82161512" target="_blank" rel="noopener" class="project-row featured-row" data-preview="Noah-Kahan-Out-of-Body.jpg">
+        <div class="project-left">
+          <span class="project-index">01</span>
+          <div>
+            <div class="project-title">Noah Kahan: Out of Body <span class="featured-badge">Netflix</span></div>
+            <div class="project-sub">Feature documentary · Producer</div>
+          </div>
+        </div>
+        <span class="project-year">2025</span>
+      </a>
+      <a href="https://vimeo.com/1098652060" target="_blank" rel="noopener" class="project-row" data-preview="Beyond-The-Elements.jpg">
+        <div class="project-left">
+          <span class="project-index">02</span>
+          <div>
+            <div class="project-title">Beyond the Elements: Chemistry, Community, and Discovery <span class="dual-badge">Producer &amp; Editor</span></div>
+            <div class="project-sub">Documentary</div>
+          </div>
+        </div>
+        <span class="project-year">2024</span>
+      </a>
+      <a href="https://vimeo.com/1112922365" target="_blank" rel="noopener" class="project-row" data-preview="GMRI.jpg">
+        <div class="project-left">
+          <span class="project-index">03</span>
+          <div>
+            <div class="project-title">Gulf of Maine Research Institute <span class="dual-badge">Producer &amp; Editor</span></div>
+            <div class="project-sub">Documentary</div>
+          </div>
+        </div>
+        <span class="project-year">2024</span>
+      </a>
+      <a href="https://vimeo.com/1121632518" target="_blank" rel="noopener" class="project-row" data-preview="The-Father-the-Son.jpg">
+        <div class="project-left">
+          <span class="project-index">04</span>
+          <div>
+            <div class="project-title">The Father The Son</div>
+            <div class="project-sub">Short film · Producer</div>
+          </div>
+        </div>
+        <span class="project-year">2024</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="editing">
+    <div class="section-header">
+      <span class="section-label">Editing</span>
+      <span class="section-count">Selected work</span>
+    </div>
+    <div class="project-list">
+      <a href="https://vimeo.com/1098652060" target="_blank" rel="noopener" class="project-row" data-preview="Beyond-The-Elements.jpg">
+        <div class="project-left">
+          <span class="project-index">01</span>
+          <div>
+            <div class="project-title">Beyond the Elements: Chemistry, Community, and Discovery <span class="dual-badge">Producer &amp; Editor</span></div>
+            <div class="project-sub">Documentary · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2024</span>
+      </a>
+      <a href="https://vimeo.com/1156954052/1ea8e5ddb5" target="_blank" rel="noopener" class="project-row" data-preview="The-Fat-Pursuit.jpg">
+        <div class="project-left">
+          <span class="project-index">02</span>
+          <div>
+            <div class="project-title">The Fat Pursuit</div>
+            <div class="project-sub">Documentary · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2025</span>
+      </a>
+      <a href="https://vimeo.com/658226391" target="_blank" rel="noopener" class="project-row" data-preview="Joy-In-color.jpg">
+        <div class="project-left">
+          <span class="project-index">03</span>
+          <div>
+            <div class="project-title">Joy in Color</div>
+            <div class="project-sub">Documentary · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2022</span>
+      </a>
+      <a href="https://www.youtube.com/watch?v=ZsSjmW7tKkM" target="_blank" rel="noopener" class="project-row" data-preview="Story-of-a-Trout.jpg">
+        <div class="project-left">
+          <span class="project-index">04</span>
+          <div>
+            <div class="project-title">The Story of a Trout</div>
+            <div class="project-sub">Documentary · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2022</span>
+      </a>
+      <a href="https://vimeo.com/1150725389/d1cacff05f" target="_blank" rel="noopener" class="project-row" data-preview="Science-For-Monks.jpg">
+        <div class="project-left">
+          <span class="project-index">05</span>
+          <div>
+            <div class="project-title">Science for Monks and Nuns</div>
+            <div class="project-sub">Documentary · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2025</span>
+      </a>
+      <a href="https://vimeo.com/1112922365" target="_blank" rel="noopener" class="project-row" data-preview="GMRI.jpg">
+        <div class="project-left">
+          <span class="project-index">06</span>
+          <div>
+            <div class="project-title">Gulf of Maine Research Institute <span class="dual-badge">Producer &amp; Editor</span></div>
+            <div class="project-sub">Documentary · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2024</span>
+      </a>
+      <a href="https://vimeo.com/1186808612/1d0c33d2e5" target="_blank" rel="noopener" class="project-row" data-preview="Ninja-More-Than-Pizza.jpg">
+        <div class="project-left">
+          <span class="project-index">07</span>
+          <div>
+            <div class="project-title">NINJA: More Than Pizza</div>
+            <div class="project-sub">Branded content · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2024</span>
+      </a>
+      <a href="https://vimeo.com/739066919" target="_blank" rel="noopener" class="project-row" data-preview="Etching-A-Life-In-Color.jpg">
+        <div class="project-left">
+          <span class="project-index">08</span>
+          <div>
+            <div class="project-title">Etching a Life in Color</div>
+            <div class="project-sub">Documentary · Editor</div>
+          </div>
+        </div>
+        <span class="project-year">2022</span>
+      </a>
+    </div>
+  </section>
+
+  <section id="writing">
+    <div class="section-header">
+      <span class="section-label">Writing</span>
+      <span class="section-count">Substack</span>
+    </div>
+    <div class="writing-grid">
+      <a href="https://open.substack.com/pub/henryallison/p/monkey-love?r=6i2quo&utm_campaign=post&utm_medium=web" target="_blank" rel="noopener" class="writing-card project-row" data-preview="Monkey-Love.jpg">
+        <p class="writing-title">Monkey Love</p>
+        <p class="writing-desc">A Brief History</p>
+        <p class="writing-link">Read on Substack →</p>
+      </a>
+      <a href="https://open.substack.com/pub/henryallison/p/the-great-unbelievable-unprecedented?r=6i2quo&utm_campaign=post&utm_medium=web" target="_blank" rel="noopener" class="writing-card project-row" data-preview="The-Great-Unbelievable-Unprecedented-Stupid-Tragedy.jpg">
+        <p class="writing-title">The Great, Unbelievable, Unprecedented, Stupid Tragedy</p>
+        <p class="writing-desc">How is the most shocking president in modern history also the most boring?</p>
+        <p class="writing-link">Read on Substack →</p>
+      </a>
+    </div>
+    <a href="https://substack.com/@henryallison" target="_blank" rel="noopener" class="substack-cta">
+      View all writing on Substack →
+    </a>
+  </section>
+
+
+
+  <section id="about">
+    <div class="section-header">
+      <span class="section-label">About</span>
+    </div>
+    <div class="about-grid">
+      <div class="photo-frame">
+        <img src="Henry-Headshot-Website.jpg" alt="Henry Allison">
+      </div>
+      <div>
+        <div class="about-body">
+          <p>
+            Henry Allison is a <em>film producer and editor</em> based in Salt Lake City, Utah. His work spans documentary, commercial, and branded spheres.
+          </p>
+          <p>
+            He is the co-producer of <em>Noah Kahan: Out of Body</em>, a feature-length documentary about the musician Noah Kahan, now streaming on Netflix.
+          </p>
+          <p>
+            Henry is a partner at <em>Brown Barn Studios</em>, a boutique documentary production company that specializes in helping businesses and organizations demonstrate their impact. The company's work is grounded in a belief that documentary storytelling is one of the most powerful tools available for communicating what an organization stands for and why it matters.
+          </p>
+          <p>
+            He also writes on Substack and enjoys skiing in the Wasatch mountains, challenging local seniors to a lively game of pickleball, and telling the same three stories at every dinner party.
+          </p>
+        </div>
+        <div class="about-links">
+          <div>
+            <p class="about-link-label">Email</p>
+            <a href="mailto:henry@brownbarnstudios.com" class="about-link-value">henry@brownbarnstudios.com</a>
+          </div>
+          <div>
+            <p class="about-link-label">Company</p>
+            <a href="https://brownbarnstudios.com" target="_blank" rel="noopener" class="about-link-value">Brown Barn Studios</a>
+          </div>
+          <div>
+            <p class="about-link-label">Writing</p>
+            <a href="https://substack.com/@henryallison" target="_blank" rel="noopener" class="about-link-value">Substack</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="footer-copy">© 2026 Henry Allison</span>
+    <a href="https://calendly.com/henry-brownbarnstudios/30min" target="_blank" rel="noopener" class="footer-chat">Let's chat →</a>
+    <span class="footer-copy">Salt Lake City, Utah</span>
+  </footer>
+
+  <script>
+    const overlay = document.getElementById('preview-overlay');
+    const previewImg = document.getElementById('preview-img');
+    const rows = document.querySelectorAll('[data-preview]');
+    let hideTimeout;
+
+    rows.forEach(row => {
+      row.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+        const src = row.getAttribute('data-preview');
+        if (previewImg.getAttribute('src') !== src) {
+          previewImg.src = src;
+        }
+        overlay.classList.add('active');
+      });
+
+      row.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+          overlay.classList.remove('active');
+        }, 120);
+      });
+    });
+  </script>
+
+</body>
+</html>
