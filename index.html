@@ -509,11 +509,45 @@
       .writing-grid { grid-template-columns: 1fr; }
       .about-grid { grid-template-columns: 1fr; gap: 2rem; }
       .photo-frame { aspect-ratio: 4/3; max-width: 280px; }
-      .belief { padding: 3rem 1.5rem 4rem; }
-      .belief-text { font-size: 24px; }
       footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
       .about-links { flex-direction: column; gap: 1.5rem; }
       #preview-overlay { display: none; }
+
+      /* Mobile slideshow */
+      #mobile-slideshow {
+        display: block;
+      }
+    }
+
+    #mobile-slideshow {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    .mobile-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    .mobile-slide.active { opacity: 1; }
+
+    .mobile-slide::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to right,
+        rgba(12, 12, 11, 0.92) 0%,
+        rgba(12, 12, 11, 0.65) 50%,
+        rgba(12, 12, 11, 0.55) 100%
+      );
     }
   </style>
 </head>
@@ -522,6 +556,22 @@
   <!-- HOVER PREVIEW OVERLAY -->
   <div id="preview-overlay">
     <img id="preview-img" src="" alt="">
+  </div>
+
+  <!-- MOBILE SLIDESHOW -->
+  <div id="mobile-slideshow">
+    <div class="mobile-slide active" style="background-image: url('Noah-Kahan-Out-of-Body.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('Beyond-The-Elements.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('The-Fat-Pursuit.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('Joy-In-color.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('Story-of-a-Trout.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('Science-For-Monks.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('GMRI.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('Ninja-More-Than-Pizza.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('Etching-A-Life-In-Color.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('The-Father-the-Son.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('Monkey-Love.jpg')"></div>
+    <div class="mobile-slide" style="background-image: url('The-Great-Unbelievable-Unprecedented-Stupid-Tragedy.jpg')"></div>
   </div>
 
   <nav>
@@ -729,10 +779,10 @@
             He is the co-producer of <em>Noah Kahan: Out of Body</em>, a feature-length documentary about the musician Noah Kahan, now streaming on Netflix.
           </p>
           <p>
-            Henry is a partner at <em>Brown Barn Studios</em>, a boutique documentary production company that specializes in helping businesses and organizations demonstrate their impact. The company's work is grounded in a belief that documentary storytelling is one of the most powerful tools available for communicating what an organization stands for and why it matters.
+            Henry is a partner at <em>Brown Barn Studios</em>, a documentary production company that specializes in helping businesses and organizations demonstrate their impact.
           </p>
           <p>
-            He also writes on Substack and enjoys skiing in the Wasatch mountains, challenging local seniors to a lively game of pickleball, and telling the same three stories at every dinner party.
+            He also writes on Substack and enjoys skiing in the Wasatch mountains, and enjoys challenging local seniors to a lively game of pickleball.
           </p>
         </div>
         <div class="about-links">
@@ -781,6 +831,55 @@
         }, 120);
       });
     });
+
+    // Scroll-driven mobile slideshow
+    if (window.innerWidth <= 768) {
+      const slides = document.querySelectorAll('.mobile-slide');
+      const total = slides.length;
+      let currentIndex = 0;
+      let displayIndex = 0;
+      let lastScrollY = window.scrollY;
+      let velocity = 0;
+      let accumulator = 0;
+      const SCROLL_PER_SLIDE = 300; // px of scroll per image change
+      const DAMPING = 0.88;         // smoothing — higher = slower transitions
+      const MIN_INTERVAL = 600;     // ms minimum between slide changes
+      let lastChangeTime = 0;
+
+      function setSlide(index) {
+        const now = Date.now();
+        if (index === displayIndex) return;
+        if (now - lastChangeTime < MIN_INTERVAL) return;
+        slides[displayIndex].classList.remove('active');
+        displayIndex = ((index % total) + total) % total;
+        slides[displayIndex].classList.add('active');
+        lastChangeTime = now;
+      }
+
+      function onScroll() {
+        const scrollY = window.scrollY;
+        const delta = scrollY - lastScrollY;
+        lastScrollY = scrollY;
+        velocity += delta;
+      }
+
+      function tick() {
+        velocity *= DAMPING;
+        accumulator += velocity;
+
+        const stepsForward = Math.floor(accumulator / SCROLL_PER_SLIDE);
+        if (stepsForward !== 0) {
+          accumulator -= stepsForward * SCROLL_PER_SLIDE;
+          currentIndex += stepsForward;
+          setSlide(currentIndex);
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      requestAnimationFrame(tick);
+    }
   </script>
 
 </body>
